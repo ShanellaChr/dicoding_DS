@@ -38,6 +38,7 @@ st.title("🚴‍♀️ Bike Data Analysis 🚴‍♀️")
 st.markdown("""
 Welcome to the **Bike Data Analysis App**!
 Here, you can explore:
+- **Monthly Trend Analysis**
 - **Seasonal Trends**
 - **Weather Impact**
 - **Comparison: Weekday vs Weekend**
@@ -52,7 +53,7 @@ st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Bicy
 st.sidebar.subheader("1. Select Analysis Type")
 analysis_type = st.sidebar.radio(
     "Type of analysis:",
-    ('Seasonal Analysis', 'Weather Analysis', 'Weekday vs Weekend')
+    ('Monthly Trend Analysis', 'Seasonal Analysis', 'Weather Analysis', 'Weekday vs Weekend')
 )
 
 st.sidebar.subheader("2. Select Date Range")
@@ -70,7 +71,37 @@ start_date, end_date = st.sidebar.date_input(
 filtered_day_df = day_df[(day_df['dteday'] >= pd.to_datetime(start_date)) & (day_df['dteday'] <= pd.to_datetime(end_date))]
 
 # Analysis based on user selection
-if analysis_type == 'Seasonal Analysis':
+if analysis_type == 'Monthly Trend Analysis':
+    st.header("📅 Tren Penyewaan Sepeda Bulanan 📅")
+    st.markdown("Analisis tren penyewaan sepeda dalam beberapa bulan terakhir.")
+
+    # Total penyewaan per bulan
+    monthly_data = filtered_day_df.groupby('month')['cnt'].sum().reset_index()
+
+    # Line plot untuk tren
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.lineplot(x='month', y='cnt', data=monthly_data, marker='o', color='darkorange', ax=ax)
+    ax.set_title('Tren Penyewaan Sepeda Bulanan', fontsize=16)
+    ax.set_xlabel('Bulan', fontsize=12)
+    ax.set_ylabel('Jumlah Penyewaan Sepeda', fontsize=12)
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.set_xticks(range(1, 13))
+    ax.set_xticklabels(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+    st.pyplot(fig)
+
+    # Bar plot untuk total penyewaan per bulan
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.barplot(x='month', y='cnt', data=monthly_data, color='teal', ax=ax)
+    ax.set_title('Total Penyewaan Sepeda per Bulan', fontsize=16)
+    ax.set_xlabel('Bulan', fontsize=12)
+    ax.set_ylabel('Jumlah Penyewaan Sepeda', fontsize=12)
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.set_xticks(range(1, 13))
+    ax.set_xticklabels(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+    st.pyplot(fig)
+
+
+elif analysis_type == 'Seasonal Analysis':
     st.header("🌸 Seasonal Analysis 🌸")
     st.markdown("Analyze total bike rentals by season.")
 
