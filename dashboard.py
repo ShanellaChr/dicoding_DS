@@ -120,17 +120,30 @@ elif analysis_type == 'Weather Analysis':
     st.header("🌦️ Weather Analysis 🌦️")
     st.markdown("Explore how weather conditions affect bike rentals.")
 
-    filtered_day_df['weather_icon'] = filtered_day_df['weathersit'].map(weather_icons)
-    weather_data = filtered_day_df.groupby('weathersit')['cnt'].sum().reset_index()
-    weather_data['icon'] = weather_data['weathersit'].map(weather_icons)
+    # Mapping angka ke deskripsi cuaca
+    weather_mapping = {
+        1: 'Clear / Few Clouds',
+        2: 'Mist + Cloudy',
+        3: 'Light Snow / Rain',
+        4: 'Heavy Rain / Fog'
+    }
+    weather_transactions = filtered_day_df.groupby('weathersit')['cnt'].sum().reset_index()
+    weather_transactions['weathersit'] = weather_transactions['weathersit'].replace(weather_mapping)
 
+    all_weather_conditions = ['Clear / Few Clouds', 'Mist + Cloudy', 'Light Snow / Rain', 'Heavy Rain / Fog']
+    weather_transactions = weather_transactions.set_index('weathersit')
+    weather_transactions = weather_transactions.reindex(all_weather_conditions, fill_value=0).reset_index()
+
+    highest_weather_index = weather_transactions['cnt'].idxmax()
+    colors = ['#66CDAA', '#32CD32', '#228B22', '#006400']
+    colors[highest_weather_index] = '#006450'
+    
     fig, ax = plt.subplots(figsize=(10, 6))
-    sns.barplot(x='weathersit', y='cnt', data=weather_data, palette="coolwarm", ax=ax)
-    ax.set_title('Total Rentals by Weather Condition', fontsize=16)
-    ax.set_xlabel('Weather Type', fontsize=12)
-    ax.set_ylabel('Total Rentals', fontsize=12)
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{int(x):,}'))
-    ax.set_xticklabels([f"{icon} {desc}" for icon, desc in zip(weather_data['icon'], ['Clear', 'Mist', 'Snow', 'Rain'])])
+    sns.barplot(x='weathersit', y='cnt', data=weather_transactions, palette=colors, ax=ax)
+    ax.set_title('Total Transactions by Weather Condition', fontsize=16, fontweight='bold')
+    ax.set_xlabel('Weather', fontsize=12, fontweight='bold')
+    ax.set_ylabel('Total Number of Transactions (cnt)', fontsize=12, fontweight='bold')
+    ax.tick_params(axis='x', rotation=0)  
     st.pyplot(fig)
 
 elif analysis_type == 'Weekday vs Weekend':
